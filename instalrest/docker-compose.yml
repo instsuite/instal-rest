@@ -1,0 +1,23 @@
+version: '2'
+services:
+    instal-db:
+        image: postgres
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_PASSWORD=instal
+            - POSTGRES_USER=instal
+            - POSTGRES_DB=instal-rest-v1
+
+    instal-rabbit:
+        image: rabbitmq
+        ports:
+            - "5672:5672"
+        environment:
+            - RABBITMQ_DEFAULT_USER=instal
+            - RABBITMQ_DEFAULT_PASS=instal
+
+    instal-rest:
+        image: instal-rest
+        ports:
+            - "5000:5000"
