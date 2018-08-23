@@ -110,6 +110,7 @@ class InstALQuery(BaseModel):
     json_out = JSONField(default=[])
     status = CharField(default="running")
     errors = ArrayField(TextField,default=[],index=False)
+    logic_programming = ArrayField(TextField,index=False)
 
     class AnswerSetNotFound(Exception):
         pass
@@ -125,6 +126,8 @@ class InstALQuery(BaseModel):
         length = fields.Integer()
         facts = fields.List(fields.String())
         number = fields.Integer()
+        logic_programs = fields.List(fields.String())
+
 
     def output_from_form_data(self, rq, answer_set_number):
         if answer_set_number > len(self.json_out):
@@ -154,14 +157,14 @@ class InstALQuery(BaseModel):
         marshelled = cls.get_marshelled_dict(data)
         di = marshelled.data
         new_query = cls(grounding_id=grounding_id,length=di.get("length",0),query=di.get("query",[]),
-                        facts=di.get("facts",[]),number=di.get("number",1))
+                        facts=di.get("facts",[]),number=di.get("number",1),logic_programming=di.get("logic_programs",[]))
         new_query.save()
         return new_query
 
     def execute_instal(self) -> None:
         ial_files = [StringIO(s) for s in self.grounding.model.institutions]
         bridge_files = [StringIO(s) for s in self.grounding.model.bridges]
-        logic_programs = [StringIO(s) for s in self.grounding.model.logic_programming]
+        logic_programs = [StringIO(s) for s in self.grounding.model.logic_programming] + [StringIO(s) for s in self.logic_programming]
         domains = [StringIO(self.grounding.get_domain_text())]
         query_file = StringIO(self.get_query_text())
         fact_files = [StringIO(s) for s in self.facts] + [StringIO(s) for s in self.grounding.facts] + [StringIO(s) for s in self.grounding.model.facts]
